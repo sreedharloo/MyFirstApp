@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Personal Time Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Time Tracker</h1>
+      <div class="controls">
+        <label>
+          <span>Date</span>
+          <input type="date" id="datePicker" />
+        </label>
+        <button id="todayBtn" title="Jump to today">Today</button>
+        <button id="exportBtn" title="Export all data">Export</button>
+        <label class="import-label" title="Import previously exported data">
+          Import
+          <input type="file" id="importInput" accept="application/json" />
+        </label>
+      </div>
+    </header>
+
+    <section class="legend" id="legend"></section>
+
+    <main class="calendar">
+      <aside class="times" id="times"></aside>
+      <section class="grid" id="grid">
+        <div class="blocks" id="blocks"></div>
+        <div class="selection" id="selection" hidden></div>
+      </section>
+      <aside class="summary">
+        <div>
+          <h2>Daily Summary</h2>
+          <ul id="dailySummary"></ul>
+          <div class="total" id="dailyTotal"></div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <h2>Month Summary</h2>
+          <ul id="monthSummary"></ul>
+          <div class="total" id="monthTotal"></div>
+        </div>
+      </aside>
+    </main>
+
+    <dialog id="entryDialog">
+      <form method="dialog" id="entryForm">
+        <h3 id="dialogTitle">Add Entry</h3>
+        <div class="form-row">
+          <label>
+            Start
+            <input type="time" id="startTime" step="900" required />
+          </label>
+          <label>
+            End
+            <input type="time" id="endTime" step="900" required />
+          </label>
+        </div>
+        <div class="form-row">
+          <label>
+            Category
+            <select id="categorySelect"></select>
+          </label>
+        </div>
+        <label>
+          Notes
+          <input type="text" id="noteInput" maxlength="120" placeholder="Optional" />
+        </label>
+        <menu class="dialog-actions">
+          <button value="cancel" id="cancelBtn">Cancel</button>
+          <button value="delete" id="deleteBtn" class="danger" hidden>Delete</button>
+          <button value="save" id="saveBtn" class="primary">Save</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+
