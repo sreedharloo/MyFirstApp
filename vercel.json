@@ -1,14 +1,9 @@
 {
-  "builds": [
-    {
-      "src": "react-app/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
-    }
-  ],
+  "framework": "vite",
+  "installCommand": "cd react-app && npm install",
+  "buildCommand": "cd react-app && npm run build",
+  "outputDirectory": "react-app/dist",
   "routes": [
-    { "src": "/.*", "dest": "/index.html" }
-  ],
-  "framework": "vite"
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
-
