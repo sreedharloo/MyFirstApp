@@ -98,7 +98,7 @@ export default function App(){
             <input type="date" value={currentDate} onChange={e=>setCurrentDate(e.target.value)} />
           </label>
           <button onClick={()=>{ const t=toDateInputValue(new Date()); setCurrentDate(t) }}>Today</button>
-          <button onClick={onAddCategory}>Add Category</button>
+          <button onClick={onAddCategory}>Add Categories</button>
           <label>
             Time Range
             <select value={range} onChange={e=>setRange(e.target.value)}>
