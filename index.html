@@ -15,6 +15,7 @@
           <input type="date" id="datePicker" />
         </label>
         <button id="todayBtn" title="Jump to today">Today</button>
+        <button id="addCategoryBtn" title="Add a custom category">Add Category</button>
         <button id="exportBtn" title="Export all data">Export</button>
         <label class="import-label" title="Import previously exported data">
           Import
@@ -32,6 +33,21 @@
         <div class="selection" id="selection" hidden></div>
       </section>
       <aside class="summary">
+        <div>
+          <h2>Dashboard</h2>
+          <label>
+            Time Range
+            <select id="rangeSelect">
+              <option value="today">Today</option>
+              <option value="thisWeek">This Week</option>
+              <option value="last7">Last 7 Days</option>
+              <option value="thisMonth">This Month</option>
+              <option value="thisYear">This Year</option>
+            </select>
+          </label>
+          <div id="rangeChart" class="chart"></div>
+        </div>
+        <div class="divider"></div>
         <div>
           <h2>Daily Summary</h2>
           <ul id="dailySummary"></ul>
@@ -66,7 +82,7 @@
           </label>
         </div>
         <label>
-          Notes
+          Activity Name
           <input type="text" id="noteInput" maxlength="120" placeholder="Optional" />
         </label>
         <menu class="dialog-actions">

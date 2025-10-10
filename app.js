@@ -29,6 +29,9 @@ const monthTotalEl = document.getElementById('monthTotal');
 
 const exportBtn = document.getElementById('exportBtn');
 const importInput = document.getElementById('importInput');
+const addCategoryBtn = document.getElementById('addCategoryBtn');
+const rangeSelect = document.getElementById('rangeSelect');
+const rangeChart = document.getElementById('rangeChart');
 
 // Dialog elements
 const entryDialog = document.getElementById('entryDialog');
@@ -178,6 +181,85 @@ function updateSummaries(){
     monthSummaryEl.appendChild(li);
   }
   monthTotalEl.textContent = `Total: ${monthTotal} min`;
+}
+
+// --- Dashboard range chart ---
+function dateToKey(d){ return toDateInputValue(d); }
+function startOfWeek(d){ const x = new Date(d); const day = (x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
+function startOfMonth(d){ const x = new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
+function startOfYear(d){ const x = new Date(d); x.setMonth(0,1); x.setHours(0,0,0,0); return x; }
+function eachDate(from, to){ const out=[]; const x=new Date(from); while(x<=to){ out.push(new Date(x)); x.setDate(x.getDate()+1);} return out; }
+
+function getEntriesForRange(range){
+  const current = new Date(currentDate);
+  current.setHours(0,0,0,0);
+  const all = loadAll();
+  const collect = [];
+
+  if(range==='today'){
+    return loadDay(currentDate);
+  }
+  if(range==='last7'){
+    const to = new Date(current);
+    const from = new Date(current); from.setDate(from.getDate()-6);
+    for(const d of eachDate(from,to)){
+      const key = dateToKey(d);
+      collect.push(...(all[key]||[]));
+    }
+    return collect;
+  }
+  if(range==='thisWeek'){
+    const from = startOfWeek(current);
+    const to = new Date(from); to.setDate(from.getDate()+6);
+    for(const d of eachDate(from,to)){
+      const key = dateToKey(d);
+      collect.push(...(all[key]||[]));
+    }
+    return collect;
+  }
+  if(range==='thisMonth'){
+    const from = startOfMonth(current);
+    const to = new Date(from); to.setMonth(from.getMonth()+1); to.setDate(0);
+    for(const d of eachDate(from,to)){
+      const key = dateToKey(d);
+      collect.push(...(all[key]||[]));
+    }
+    return collect;
+  }
+  if(range==='thisYear'){
+    const from = startOfYear(current);
+    const to = new Date(from); to.setFullYear(from.getFullYear()+1); to.setDate(0);
+    for(const d of eachDate(from,to)){
+      const key = dateToKey(d);
+      collect.push(...(all[key]||[]));
+    }
+    return collect;
+  }
+  return loadDay(currentDate);
+}
+
+function buildRangeChart(){
+  const range = rangeSelect?.value || 'today';
+  const entries = getEntriesForRange(range);
+  const byCat = new Map();
+  let total = 0;
+  for(const e of entries){ const dur = e.end - e.start; total += dur; byCat.set(e.category, (byCat.get(e.category)||0)+dur); }
+  rangeChart.innerHTML = '';
+  if(total===0){ rangeChart.textContent = 'No data'; return; }
+  // Sort by largest
+  const items = [...byCat.entries()].sort((a,b)=>b[1]-a[1]);
+  for(const [catId, mins] of items){
+    const cat = CATEGORIES.find(c=>c.id===catId) || {name:catId, color:'#666'};
+    const percent = Math.round((mins/total)*100);
+    const bar = document.createElement('div'); bar.className = 'bar';
+    const label = document.createElement('div'); label.className='label'; label.textContent = cat.name;
+    const track = document.createElement('div'); track.className='track';
+    const fill = document.createElement('div'); fill.className='fill'; fill.style.width = percent + '%'; fill.style.background = cat.color;
+    track.appendChild(fill);
+    const value = document.createElement('div'); value.className='value'; value.textContent = `${mins} min`;
+    bar.appendChild(label); bar.appendChild(track); bar.appendChild(value);
+    rangeChart.appendChild(bar);
+  }
 }
 
 // --- Interaction: drag selection ---
@@ -343,12 +425,14 @@ function init(){
   setupGridInteraction();
   renderBlocks();
   updateSummaries();
+  if(rangeSelect && rangeChart){ buildRangeChart(); }
 }
 
 datePicker.addEventListener('change', ()=>{
   currentDate = datePicker.value;
   renderBlocks();
   updateSummaries();
+  buildRangeChart();
 });
 
 todayBtn.addEventListener('click', ()=>{
@@ -356,8 +440,33 @@ todayBtn.addEventListener('click', ()=>{
   datePicker.value = currentDate;
   renderBlocks();
   updateSummaries();
+  buildRangeChart();
 });
 
 // Kick off
 init();
+
+// Add custom category
+addCategoryBtn?.addEventListener('click', ()=>{
+  const name = prompt('New category name?');
+  if(!name) return;
+  let color = prompt('Color hex (e.g. #33cc88)? Leave blank for random.');
+  if(!color || !/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)){
+    // random pleasant color
+    const hue = Math.floor(Math.random()*360);
+    color = `hsl(${hue} 70% 60%)`;
+  }
+  const idBase = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  let id = idBase || 'cat'; let n=1; while(CATEGORIES.some(c=>c.id===id)){ id = `${idBase}-${n++}`; }
+  CATEGORIES.push({ id, name, color });
+  saveCategories();
+  renderLegend();
+  populateCategorySelect();
+  buildRangeChart();
+  alert('Category added');
+});
+
+rangeSelect?.addEventListener('change', ()=>{
+  buildRangeChart();
+});
 
