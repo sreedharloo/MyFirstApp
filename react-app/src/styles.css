@@ -105,3 +105,17 @@ body{
   .summary{grid-column: 1 / -1; border-left:none; border-top:1px solid var(--border)}
 }
 
+/* Dialog styles */
+dialog{
+  border:1px solid var(--border); border-radius:12px; background:#0d1020; color:var(--text); padding:0; max-width:460px; width:92vw;
+}
+dialog::backdrop{background:rgba(0,0,0,0.5)}
+.form-row{display:flex; gap:10px}
+label{display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted)}
+input[type="time"], input[type="text"], select{
+  background:#0d1020; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:14px;
+}
+.dialog-actions{display:flex; justify-content:flex-end; gap:10px; padding-top:4px}
+.dialog-actions button{background:#12162a; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 12px; cursor:pointer}
+.dialog-actions .primary{background:var(--accent); color:#07122a; border-color:transparent}
+.dialog-actions .danger{background:var(--danger); color:#07122a; border-color:transparent}

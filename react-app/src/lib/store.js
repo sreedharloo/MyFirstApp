@@ -55,23 +55,28 @@ export async function loadEntriesInRange(fromStr, toStr){
     return data
   }
   const all = loadAllLocal()
-  const days = Object.entries(all).filter(([d]) => d >= fromStr && d <= toStr).flatMap(([,list]) => list)
+  const days = Object.entries(all)
+    .filter(([d]) => d >= fromStr && d <= toStr)
+    .flatMap(([date,list]) => (list||[]).map(e => ({...e, date})))
   return days
 }
 
 export async function upsertEntry(entry){
   if(supabaseEnabled){
-    const { data, error } = await supabase.from('entries').upsert(entry).select()
+    const payload = { ...entry }
+    if(!payload.id) delete payload.id // let DB default generate UUID
+    const { data, error } = await supabase.from('entries').upsert(payload).select()
     if(error) throw error
     return data[0]
   }
   const all = loadAllLocal();
   const list = all[entry.date] || []
-  const idx = list.findIndex(e=>e.id===entry.id)
-  if(idx>=0) list[idx]=entry; else list.push(entry)
+  const newEntry = { id: entry.id || Math.random().toString(36).slice(2,10), ...entry }
+  const idx = list.findIndex(e=>e.id===newEntry.id)
+  if(idx>=0) list[idx]=newEntry; else list.push(newEntry)
   list.sort((a,b)=>a.start-b.start)
   all[entry.date]=list; saveAllLocal(all)
-  return entry
+  return newEntry
 }
 
 export async function deleteEntry(entry){
@@ -90,4 +95,3 @@ export function toDateInputValue(d){
   const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`
 }
-

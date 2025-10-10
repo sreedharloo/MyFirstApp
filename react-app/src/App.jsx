@@ -69,7 +69,6 @@ export default function App(){
   function openEdit(e){ setModal({ ...e }) }
   async function saveModal(){
     const e = { ...modal }
-    e.id = e.id || Math.random().toString(36).slice(2,10)
     e.date = currentDate
     await upsertEntry(e)
     setModal(null)
@@ -157,4 +156,3 @@ export default function App(){
     </div>
   )
 }
-

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 const INCREMENT_MIN = 15
 const ROWS_PER_DAY = (24*60)/INCREMENT_MIN
@@ -31,6 +31,33 @@ export default function Calendar({ dateStr, entries, onCreate, onEdit }){
     if(b-a<1) return
     onCreate(rowToMinutes(a), rowToMinutes(b))
   }
+
+  // Ensure drag end is captured even if cursor leaves the grid
+  useEffect(()=>{
+    if(!drag) return
+    const onMove = (ev)=>{
+      const grid = gridRef.current; if(!grid) return
+      const rect = grid.getBoundingClientRect()
+      const clampedY = Math.min(Math.max(ev.clientY, rect.top), rect.bottom)
+      const y = clampedY - rect.top + grid.scrollTop
+      const row = Math.floor(y/20)
+      setDrag(d => d ? ({...d, endRow: Math.max(0, Math.min(ROWS_PER_DAY-1, row))}) : d)
+    }
+    const onUp = ()=>{
+      const d = drag
+      setDrag(null)
+      if(!d) return
+      const a = Math.min(d.startRow, d.endRow)
+      const b = Math.max(d.startRow, d.endRow) + 1
+      if(b-a>=1) onCreate(rowToMinutes(a), rowToMinutes(b))
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return ()=>{
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [drag])
   const clientYToRow = (clientY)=>{
     const grid = gridRef.current
     if(!grid) return null
@@ -73,4 +100,3 @@ export default function Calendar({ dateStr, entries, onCreate, onEdit }){
     </div>
   )
 }
-
