@@ -102,7 +102,7 @@ export default function App(){
           <label>
             Time Range
             <select value={range} onChange={e=>setRange(e.target.value)}>
-              <option value="todays">Today</option>
+              <option value="today">Today</option>
               <option value="thisWeeks">This Week</option>
               <option value="last7">Last 7 Days</option>
               <option value="thisMonth">This Month</option>
